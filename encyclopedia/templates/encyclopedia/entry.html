@@ -5,10 +5,12 @@
 {% endblock %}
 
 {% block body %}
+
     {% if entry %}
         {{ content | safe }}
     {% else %}
         <h1>Error 404</h1>
         <p>Requested page was not found.</p>
     {% endif %}
+    
 {% endblock %}

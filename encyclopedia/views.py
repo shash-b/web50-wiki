@@ -6,6 +6,21 @@ from markdown2 import Markdown
 markdowner = Markdown()
 
 def index(request):
+    if request.method == "POST":
+        query = request.POST['q']
+
+        if query in [i.lower() for i in util.list_entries()]:
+            return entry(request, query)
+        
+        entries = []
+        for item in util.list_entries():
+            if request.POST['q'] in item.lower():
+                entries.append(item)
+
+        return render(request, "encyclopedia/search.html", {
+            "entries": entries
+        })
+
     return render(request, "encyclopedia/index.html", {
         "entries": util.list_entries()
     })
