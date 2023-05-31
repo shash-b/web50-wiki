@@ -5,11 +5,16 @@
 {% endblock %}
 
 {% block body %}
-    <h1>All Pages</h1>
+
+    <h1>All Results</h1>
 
     <ul>
         {% for entry in entries %}
+        {% if from_entry %}
+            <li><a href="{{ entry }}">{{ entry }}</a></li>
+        {% else %}
             <li><a href="wiki/{{ entry }}">{{ entry }}</a></li>
+        {% endif %}
         {% endfor %}
     </ul>
 
