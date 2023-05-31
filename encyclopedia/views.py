@@ -7,7 +7,7 @@ markdowner = Markdown()
 
 class NewEntryForm(forms.Form):
     title = forms.CharField(label="New title")
-    markdown = forms.CharField(widget=forms.Textarea)
+    markdown_content = forms.CharField(widget=forms.Textarea)
 
 def index(request):
     if request.method == "POST":
@@ -20,8 +20,11 @@ def index(request):
 
 def entry(request, title):
     if request.method == "POST":
-        if request.POST['q']:
-            return search(request, True)
+        try:
+            if request.POST['q']:
+                return search(request, True)
+        except:
+            pass
 
     entry = util.get_entry(title)
     content, title = "", "Error 404"
@@ -39,8 +42,31 @@ def entry(request, title):
 
 def new(request):
     if request.method == "POST":
-        if request.POST['q']:
-            return search(request, False)
+        try:
+            if request.POST['q']:
+                return search(request, False)
+        except:
+            pass
+
+        form = NewEntryForm(request.POST)
+
+        if form.is_valid():
+            title = form.cleaned_data["title"]
+            content = form.cleaned_data["markdown_content"]
+            print(title, content)
+        
+        if not util.get_entry(title):
+            with open(f"entries/{title}.md", "w") as f:
+                f.write(f"# {title}\n")
+                f.write(content)
+
+            return entry(request, title)
+        
+        else:
+            return render(request, "encyclopedia/new.html", {
+                "form": form,
+                "error": True
+            })
 
     return render(request, "encyclopedia/new.html", {
         "form": NewEntryForm()

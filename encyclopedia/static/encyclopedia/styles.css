@@ -12,9 +12,17 @@ h1 {
     padding-top: 20px;
 }
 
+form {
+    display: flex;
+    flex-direction: column;
+}
+
 textarea {
-    height: 90vh;
-    width: 80%;
+    height: 50vh;
+}
+
+label, input[type="submit"] {
+    margin-top: 2% !important;
 }
 
 .main {
@@ -35,4 +43,12 @@ textarea {
 
 .sidebar h2 {
     margin-top: 5px;
+}
+
+.row {
+    width: 100%;
+}
+
+.error {
+    color: red;
 }
