@@ -9,6 +9,10 @@ class NewEntryForm(forms.Form):
     title = forms.CharField(label="New title")
     markdown_content = forms.CharField(widget=forms.Textarea)
 
+class EditEntryForm(forms.Form):
+    markdown_content = forms.CharField(widget=forms.Textarea)
+
+
 def index(request):
     if request.method == "POST":
         if request.POST['q']:
@@ -17,6 +21,7 @@ def index(request):
     return render(request, "encyclopedia/index.html", {
         "entries": util.list_entries()
     })
+
 
 def entry(request, title):
     if request.method == "POST":
@@ -53,13 +58,12 @@ def new(request):
         if form.is_valid():
             title = form.cleaned_data["title"]
             content = form.cleaned_data["markdown_content"]
-            print(title, content)
+            content = content.split("\n")
+            content.insert(0, f"# {title}")
+            content = "\n".join(content)
         
         if not util.get_entry(title):
-            with open(f"entries/{title}.md", "w") as f:
-                f.write(f"# {title}\n")
-                f.write(content)
-
+            save(title, content)
             return entry(request, title)
         
         else:
@@ -70,6 +74,30 @@ def new(request):
 
     return render(request, "encyclopedia/new.html", {
         "form": NewEntryForm()
+    })
+
+
+def edit(request, title):
+    if request.method == "POST":
+        try:
+            if request.POST['q']:
+                return search(request, False)
+        except:
+            pass
+
+        form = NewEntryForm({"title": title, "markdown_content": request.POST["markdown_content"]})
+
+        if form.is_valid():
+            title = title
+            content = form.cleaned_data["markdown_content"]
+
+            save(title, content)
+            return entry(request, title)
+
+    form = EditEntryForm({"markdown_content": util.get_entry(title)})
+    return render(request, "encyclopedia/edit.html", {
+        "form": form,
+        "title": title
     })
 
 
@@ -96,8 +124,12 @@ def search(request, is_entry):
         if request.POST['q'] in item.lower():
             entries.append(item)
 
-    print(entries)
     return render(request, "encyclopedia/search.html", {
         "entries": entries,
         "from_entry": is_entry
     })
+
+
+def save(title, content):
+    with open(f"entries/{title}.md", "w") as f:
+        f.write(content)
